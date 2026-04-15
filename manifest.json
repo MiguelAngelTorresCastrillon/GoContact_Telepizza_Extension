@@ -1,0 +1,53 @@
+{
+  "manifest_version": 3,
+  "name": "GoContact → Telepizza CRM",
+  "version": "1.0.0",
+  "description": "Automatiza la sincronización entre GoContact, Telepizza CRM y Data Studio.",
+  "author": "Miguel Ángel Torres Castrillon",
+  "icons": {
+    "16":  "icons/icon16.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16":  "icons/icon16.png",
+      "48":  "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "permissions": [
+    "storage",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://em-iberia.go-contact.com/*",
+    "https://production-eu01-telepizza.demandware.net/*",
+    "https://datastudio.google.com/*",
+    "https://www.telepizza.es/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://em-iberia.go-contact.com/*"],
+      "js": ["content/gocontact.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://production-eu01-telepizza.demandware.net/*"],
+      "js": ["content/telepizza_crm.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://datastudio.google.com/*"],
+      "js": ["content/looker.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.telepizza.es/*"],
+      "js": ["content/telepizza_web.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
