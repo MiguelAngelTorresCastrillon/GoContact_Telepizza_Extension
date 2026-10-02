@@ -1,62 +1,44 @@
-// ============================================================
-//  Copyright © 2025 Miguel Ángel Torres Castrillon
-//  Todos los derechos reservados.
-// ============================================================
+const toggle = document.getElementById('toggle');
+const stateEl = document.getElementById('state');
+const hintEl = document.getElementById('hint');
 
-const KEYS = ["crm_phone", "crm_store", "crm_store_address", "crm_order_no",
-              "crm_phone_ts", "crm_store_ts", "crm_store_address_ts", "crm_order_no_ts"];
-
-function timeAgo(ts) {
-  if (!ts) return null;
-  const diff = Math.floor((Date.now() - ts) / 1000);
-  if (diff < 5)  return "ahora";
-  if (diff < 60) return `hace ${diff}s`;
-  return `hace ${Math.floor(diff / 60)}m`;
-}
-
-function isExpired(ts) {
-  return !ts || (Date.now() - ts) > 30000;
+function ago(ts) {
+  const s = Math.max(0, Math.round((Date.now() - ts) / 1000));
+  if (s < 60) return 'hace un momento';
+  const m = Math.round(s / 60);
+  if (m < 60) return 'hace ' + m + ' min';
+  const h = Math.round(m / 60);
+  if (h < 24) return 'hace ' + h + ' h';
+  return new Date(ts).toLocaleDateString('es-ES');
 }
 
 function render(data) {
-  const fields = [
-    { id: "valPhone",   key: "crm_phone",         ts: "crm_phone_ts" },
-    { id: "valStore",   key: "crm_store",          ts: "crm_store_ts" },
-    { id: "valAddress", key: "crm_store_address",  ts: "crm_store_address_ts" },
-    { id: "valOrder",   key: "crm_order_no",       ts: "crm_order_no_ts" }
-  ];
+  const on = data.enabled !== false;
+  toggle.setAttribute('aria-checked', String(on));
+  stateEl.textContent = on ? 'Automatización activada' : 'Automatización en pausa';
+  hintEl.textContent = on ? 'Pulsa para pausarla' : 'Pulsa para activarla';
 
-  for (const f of fields) {
-    const el  = document.getElementById(f.id);
-    const val = data[f.key];
-    const ts  = data[f.ts];
-    if (val) {
-      el.textContent = val;
-      el.className = isExpired(ts)
-        ? "data-value"
-        : "data-value active";
-    } else {
-      el.textContent = "—";
-      el.className = "data-value empty";
-    }
-  }
-}
-
-function loadData() {
-  chrome.storage.local.get(KEYS, render);
-}
-
-document.getElementById("btnRefresh").addEventListener("click", loadData);
-
-document.getElementById("btnAdmin").addEventListener("click", () => {
-  chrome.tabs.create({ url: chrome.runtime.getURL("admin.html") });
-});
-
-
-document.getElementById("btnClear").addEventListener("click", () => {
-  chrome.storage.local.remove(KEYS, () => {
-    loadData();
+  document.querySelectorAll('.row').forEach((row) => {
+    const item = data[row.dataset.key];
+    const has = item && item.value;
+    row.classList.toggle('empty', !has);
+    row.querySelector('b').textContent = has ? item.value : 'Sin datos';
+    row.querySelector('time').textContent = has && item.ts ? ago(item.ts) : '';
   });
+}
+
+async function refresh() {
+  render(await chrome.storage.local.get(null));
+}
+
+toggle.addEventListener('click', async () => {
+  const { enabled } = await chrome.storage.local.get('enabled');
+  await chrome.storage.local.set({ enabled: enabled === false });
 });
 
-loadData();
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local') refresh();
+});
+
+refresh();
+setInterval(refresh, 15000);

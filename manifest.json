@@ -1,53 +1,53 @@
 {
   "manifest_version": 3,
-  "name": "GoContact → Telepizza CRM",
-  "version": "1.0.0",
-  "description": "Automatiza la sincronización entre GoContact, Telepizza CRM y Data Studio.",
-  "author": "Miguel Ángel Torres Castrillon",
+  "name": "TeleGo",
+  "version": "1.1.0",
+  "description": "Pasa teléfonos, tiendas y pedidos entre GoContact, Salesforce, Dataloop y Telepizza sin copiar y pegar.",
   "icons": {
-    "16":  "icons/icon16.png",
-    "48":  "icons/icon48.png",
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
   "action": {
+    "default_title": "TeleGo",
     "default_popup": "popup.html",
     "default_icon": {
-      "16":  "icons/icon16.png",
-      "48":  "icons/icon48.png",
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
   },
   "permissions": [
-    "storage",
-    "scripting",
-    "tabs"
+    "storage"
   ],
-  "host_permissions": [
-    "https://em-iberia.go-contact.com/*",
-    "https://production-eu01-telepizza.demandware.net/*",
-    "https://datastudio.google.com/*",
-    "https://www.telepizza.es/*"
-  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "toggle-automation": {
+      "suggested_key": {
+        "default": "Alt+Shift+T"
+      },
+      "description": "Activar / desactivar automatización"
+    }
+  },
   "content_scripts": [
     {
-      "matches": ["https://em-iberia.go-contact.com/*"],
-      "js": ["content/gocontact.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://production-eu01-telepizza.demandware.net/*"],
-      "js": ["content/telepizza_crm.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://datastudio.google.com/*"],
-      "js": ["content/looker.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://www.telepizza.es/*"],
-      "js": ["content/telepizza_web.js"],
-      "run_at": "document_idle"
+      "matches": [
+        "https://em-iberia.go-contact.com/*",
+        "https://production-eu01-telepizza.demandware.net/*",
+        "https://www.telepizza.es/on/demandware.store/*",
+        "https://sites.google.com/emergiacc.com/dataloop/*",
+        "https://*.googleusercontent.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": true
     }
   ]
 }
